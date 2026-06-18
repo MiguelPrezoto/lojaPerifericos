@@ -1,83 +1,91 @@
+<!DOCTYPE html>
 <html>
 <head>
-	<title> Mostra Produto</title>
-	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-	<meta http-equiv="refresh" content="10"> >
+    <title>Produtos - Admin</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 </head>
-<!-- <body bgcolor="cyan">  -->
 
 <?php
-
 require_once('conexao/minhafuncao.php');
 iniciar();
 titulo();
-//session_start();
 if ($_SESSION['log'] != "ativo"){
-echo"<script language='javascript' type='text/javascript'>alert('Precisa esta logado para acessar o conteúdo');window.location.href='index.php';</script>";
+    echo "<script>alert('Precisa estar logado.');window.location.href='index.php';</script>";
 }
-
 ?>
 
+<h2>Lista de Produtos</h2>
 
+<div class="nav-buttons">
+    <form action="cadastro.php" method="POST">
+        <input type="submit" value="Cadastrar Novo Produto">
+    </form>
+</div>
 
-<h1> Lista dos produtos <h1>
-
-	<h3> Verificação do conteudo  </h3>
-
-<hr>
-<form action="cadastro.php"method="POST" name="cadastroprin">
-<h1>cadastrar novo produto</h1>
-<input type="submit" name="Cadastrar" value="cadastrar">
+<form action="" method="POST">
+    <p><b>Buscar por tipo:</b><br>
+    <input type="text" name="textobusca" style="max-width:200px">
+    <input type="submit" name="buscar" value="Buscar" style="margin-top:0; display:inline-block; width:auto">
+    </p>
 </form>
- <form action=""method="POST" name="">
-<h1>busca por tipo </h1>
-<input type = "text" name=textobusca><br>
-<input type="submit" name="buscar" value="Buscar">
-</form>
- <?php
 
-       require_once('conexao/conexao.php');
-	//criando o objeto mysql e conectando ao banco de dados
-	$mysql = new BancodeDados();
-	$mysql->conecta();
-     if(isset($_POST['buscar']) && !empty($_POST['textobusca'])){
-     $pbusca=$_POST['textobusca'] ;
-      $sqlstring = "select * from tbproduto where tipo='$pbusca'";
-    } else{
-         $sqlstring = 'select * from tbproduto order by nome';
+<?php
+require_once('conexao/conexao.php');
+$mysql = new BancodeDados();
+$mysql->conecta();
+
+if(isset($_POST['buscar']) && !empty($_POST['textobusca'])){
+    $pbusca = $_POST['textobusca'];
+    $sqlstring = "select * from tbproduto where tipo='$pbusca'";
+} else {
+    $sqlstring = 'select * from tbproduto order by nome';
+}
+$query = @mysqli_query($mysql->con, $sqlstring);
+
+echo "<table>";
+echo "<tr>
+    <th>Imagem</th>
+    <th>Nome</th>
+    <th>Tipo</th>
+    <th>DescriÃ§Ã£o</th>
+    <th>PreÃ§o</th>
+    <th>Estoque</th>
+    <th>Status</th>
+    <th>Upload</th>
+    <th>Deletar</th>
+    <th>Alterar Tipo</th>
+    <th>Alterar Status</th>
+</tr>";
+
+while($dados = mysqli_fetch_array($query)){
+    $id     = base64_encode($dados['id']);
+    $idRaw  = $dados['id'];
+    $imagem = $dados['imagem'];
+
+    if($imagem && file_exists('imagens/' . $imagem)){
+        $imgHtml = "<img src='imagens/$imagem' width='50' height='50' style='object-fit:cover;'>";
+    } else {
+        $imgHtml = "<span style='font-size:10px;color:#555;text-transform:uppercase;letter-spacing:1px;'>sem foto</span>";
     }
-    $query = @mysqli_query($mysql->con, $sqlstring);
 
-
-	echo "<table border='1px'>";
-	echo "<tr><th width='30px' align='center'>Id</th><th width='100px'>Nome</th><th width='100px'>tipo</th><th width='100px'>Descrição</th><th width='100px'>Status</th><th width='100px'>Deletar</th><th width='100px'>Alterar TIPO</th> <th width='100px'>Alterar STATUS</th> ";
-
-	while($dados=mysqli_fetch_array($query))
-	{
-		echo "<tr>";
-		echo "<td align='center'>". $dados['id']."</td>";
-		echo "<td align='center'><b>". $dados['nome']."</b></td>";
-		echo "<td align='center'><b>". $dados['tipo']."</b></td>";
-		echo  "<td align='center'><b>". $dados['descricao']."</b></td>";
-		echo  "<td align='center'><b>". $dados['status']."</b></td>";
-  		$id = base64_encode($dados['id']);
-  	//$id = $dados['id'];
-      	echo "</td> <td align='center'><a href='apagar.php?id=".$dados['id']."'><img src='deleta.png' width='30px' height='30px'></a>";
-        echo "</td> <td align='center'><a href='alteratipo.php?id=$id'><img src='alterar.jpg' width='30px' height='30px'></a>";
-        echo "</td> <td align='center'><a href='alterastatus.php?id=$id'><img src='alterar.jpg' width='30px' height='30px'></a>";
-
-echo "</tr>";
-	}
-	echo "</table>";
-
-	$mysql->fechar();
-
+    echo "<tr>";
+    echo "<td>$imgHtml</td>";
+    echo "<td><b>".$dados['nome']."</b></td>";
+    echo "<td>".$dados['tipo']."</td>";
+    echo "<td>".$dados['descricao']."</td>";
+    echo "<td>R$ ".number_format($dados['preco'], 2, ',', '.')."</td>";
+    echo "<td>".$dados['estoque']."</td>";
+    echo "<td>".$dados['status']."</td>";
+    echo "<td><a href='Uploadphp.php?id=$idRaw'><img src='alterar.jpg' width='28px' height='28px' title='Upload de imagem'></a></td>";
+    echo "<td><a href='apagar.php?id=$idRaw'><img src='deleta.png' width='28px' height='28px'></a></td>";
+    echo "<td><a href='alteratipo.php?id=$id'><img src='alterar.jpg' width='28px' height='28px'></a></td>";
+    echo "<td><a href='alterastatus.php?id=$id'><img src='alterar.jpg' width='28px' height='28px'></a></td>";
+    echo "</tr>";
+}
+echo "</table>";
+$mysql->fechar();
 ?>
 
+<br><a href="cadastro.php">â† Voltar ao cadastro</a>
 
-<br> <br><a href='cadastro.php'>Voltar para tela de cadastro</a>
-
-
-</body>
-</html>
+</div></body></html>

@@ -1,14 +1,14 @@
 <?php
 class BancodeDados {
-    // Nas linhas abaixo você poderá colocar as informações do Banco de Dados.
-    private $host = "localhost:3308";
+    // Nas linhas abaixo vocï¿½ poderï¿½ colocar as informaï¿½ï¿½es do Banco de Dados.
+    private $host = "localhost";
    // private $host = "localhost"; 	// Nome ou IP do Servidor
-    private $user = "root"; 		// Usuário do Servidor MySQL
-    private $senha = ""; 		// Senha do Usuário MySQL
+    private $user = "root"; 		// Usuï¿½rio do Servidor MySQL
+    private $senha = ""; 		// Senha do Usuï¿½rio MySQL
     private $banco = "testeaula"; 		// Nome do seu Banco de Dados
     public $con;
 
-	// método responsável para conexão a base de dados
+	// mï¿½todo responsï¿½vel para conexï¿½o a base de dados
 	function conecta(){
         $this->con = mysqli_connect($this->host,$this->user,$this->senha, $this->banco);
        //   $this->con = @mysqli_connect($this->host,$this->user,$this->senha, $this->banco);
@@ -19,7 +19,7 @@ class BancodeDados {
         }
     }
 
-	// método responsável para fechar a conexão
+	// mï¿½todo responsï¿½vel para fechar a conexï¿½o
 	function fechar(){
 		mysqli_close($this->con);
 		return;

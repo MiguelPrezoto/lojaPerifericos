@@ -1,36 +1,45 @@
-<!-- Professora CÈlia Regina Bueno Figueira
-  Etec de Po·
- salvar como Upload.php -->
 <?php
-// verifica se foi enviado um arquivo
-if ( isset( $_FILES[ 'arquivo' ][ 'name' ] ) && $_FILES[ 'arquivo' ][ 'error' ] == 0 ) {
-$arquivo_tmp = $_FILES[ 'arquivo' ][ 'tmp_name' ];
-$nome = $_FILES[ 'arquivo' ][ 'name' ];
+session_start();
+if (!($_SESSION['log'] == "ativo" && $_SESSION['nivel'] == "adm")) {
+    echo "<script>alert('Acesso negado.');window.location.href='index.php';</script>";
+    exit;
+}
 
-$extensao = pathinfo ( $nome, PATHINFO_EXTENSION );
+$pid = isset($_POST['produto_id']) && is_numeric($_POST['produto_id']) ? intval($_POST['produto_id']) : 0;
+if ($pid === 0) {
+    echo "<script>alert('Produto inv√°lido.');window.location.href='pesquisa.php';</script>";
+    exit;
+}
 
-$extensao = strtolower ( $extensao );
+if (isset($_FILES['arquivo']['name']) && $_FILES['arquivo']['error'] == 0) {
+    $arquivo_tmp = $_FILES['arquivo']['tmp_name'];
+    $nome        = $_FILES['arquivo']['name'];
+    $extensao    = strtolower(pathinfo($nome, PATHINFO_EXTENSION));
 
-if ( strstr ( '.jpg;.jpeg;.gif;.png', $extensao ) ) {
+    if (in_array($extensao, ['jpg', 'jpeg', 'gif', 'png'])) {
+        $novoNome = uniqid(time()) . '.' . $extensao;
+        $destino  = 'imagens/' . $novoNome;
 
-$novoNome = uniqid ( time () ) .".". $extensao;
-//$novoNome = uniqid ( time () ) . $extensao;
- $destino = 'imagens / ' . $novoNome;
-if ( @move_uploaded_file ( $arquivo_tmp, $destino ) ){
-//if (move_uploaded_file ( $arquivo_tmp, $destino ) ){
-echo"salvo na pasta \n\n";
-echo '<center><img src = "' . $destino . '" height=400 width=790/></center>';}
-else
- echo utf8_encode('Erro ao salvar o arquivo. Aparentemente vocÍ n„o tem permiss„o  de escrita.<br />');}
-else
- echo utf8_encode("VocÍ poder· enviar apenas arquivos *.jpg;*.jpeg;*.gif;*.png <br />");}
+        if (move_uploaded_file($arquivo_tmp, $destino)) {
+            require_once('conexao/conexao.php');
+            $mysql = new BancodeDados();
+            $mysql->conecta();
+            $sqlstring = "UPDATE tbproduto SET imagem='$novoNome' WHERE id=$pid";
+            $query = @mysqli_query($mysql->con, $sqlstring);
+            $mysql->fechar();
 
-else
- echo utf8_encode('VocÍ n„o enviou nenhum arquivo!');
-
- echo"<script language='javascript' type='text/javascript'>
-          alert('voltando para o cadastro');window.location.href='cadastro.php';
-          </script>";
- 
+            if ($query) {
+                echo "<script>alert('Imagem enviada com sucesso!');window.location.href='pesquisa.php';</script>";
+            } else {
+                echo "<script>alert('Imagem salva mas n√£o vinculada ao produto.');window.location.href='pesquisa.php';</script>";
+            }
+        } else {
+            echo "<script>alert('Erro ao salvar o arquivo. Verifique as permiss√µes da pasta imagens/.');window.location.href='pesquisa.php';</script>";
+        }
+    } else {
+        echo "<script>alert('Formato inv√°lido. Use jpg, jpeg, gif ou png.');window.history.go(-1);</script>";
+    }
+} else {
+    echo "<script>alert('Nenhum arquivo enviado.');window.history.go(-1);</script>";
+}
 ?>
-

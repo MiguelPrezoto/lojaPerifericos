@@ -1,30 +1,46 @@
-<!-- Professora CÈlia Regina Bueno Figueira
-  Etec de Po·
- salvar como Uploadphp.php -->
+<!DOCTYPE html>
 <html>
 <head>
-<title> UPLOAD IMAGENS </title>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Upload de Imagem</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 </head>
-<BODY BGCOLOR="#DEDDDE">
-<font face="caviar dreams">
-<h1> Subindo uma imagem para o servidor </h1>
 <?php
 session_start();
-echo "Logado : ".$_SESSION['nome'];
-if (($_SESSION['log'] == "ativo") &&($_SESSION['nivel'] == "adm")) {
- echo"<br/> <br/> ";
-echo"<form method='post' enctype='multipart/form-data' action='Upload.php'> ";
-echo"<h3>Selecione uma imagem: </h3>   <input name='arquivo'  type='file'  /> ";
-echo"<br/> <br/>  <input type='submit' value='Salvar' />  ";
-echo"</form>";
+if (!($_SESSION['log'] == "ativo" && $_SESSION['nivel'] == "adm")) {
+    echo "<script>alert('Voc√™ n√£o tem acesso permitido.');window.location.href='cadastro.php';</script>";
+    exit;
 }
-else {
-echo"<script language='javascript' type='text/javascript'>
-alert('Voce n„o tem acesso permitido');
-window.location.href='cadastro.php';</script>";
+if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
+    echo "<script>alert('Produto inv√°lido.');window.location.href='pesquisa.php';</script>";
+    exit;
 }
+$pid = intval($_GET['id']);
+
+require_once('conexao/minhafuncao.php');
+iniciar();
+titulo();
 ?>
 
-</BODY>
-</HTML>
+<h2>Upload de imagem do produto</h2>
+
+<div style="border:1.5px solid #2a2a2a; padding:20px; margin-bottom:20px;">
+    <p style="font-size:13px; margin-bottom:16px;">
+        <span style="font-size:10px; text-transform:uppercase; letter-spacing:2px; color:#ccc;">Produto ID</span><br>
+        #<?php echo $pid; ?>
+    </p>
+    <form method="post" enctype="multipart/form-data" action="Upload.php">
+        <input type="hidden" name="produto_id" value="<?php echo $pid; ?>">
+        <label>Selecione uma imagem (jpg, jpeg, gif, png)</label>
+        <input name="arquivo" type="file" style="color:#f0ede6; margin-bottom:14px;">
+        <br>
+        <input type="submit" value="Enviar">
+    </form>
+</div>
+
+<div class="nav-buttons">
+    <form action="pesquisa.php" method="POST">
+        <input type="submit" value="‚Üê Voltar">
+    </form>
+</div>
+
+</div></body></html>
